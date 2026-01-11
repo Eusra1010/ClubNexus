@@ -42,6 +42,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ViewRegistrationsActivity.class);
             startActivity(intent);
         });
+        findViewById(R.id.cardAdminAnnouncements)
+                .setOnClickListener(v ->
+                        startActivity(new Intent(
+                                this, AdminAnnouncementActivity.class
+                        )));
 
         btnLogout.setOnClickListener(v -> {
             startActivity(new Intent(this, MainActivity.class));

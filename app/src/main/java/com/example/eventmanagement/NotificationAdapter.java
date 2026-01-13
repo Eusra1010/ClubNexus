@@ -19,9 +19,12 @@ public class NotificationAdapter
         extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
     private final List<Notification> list;
+    public interface NotificationActionListener { void onMarkRead(Notification n); }
+    private final NotificationActionListener listener;
 
-    public NotificationAdapter(List<Notification> list) {
+    public NotificationAdapter(List<Notification> list, NotificationActionListener listener) {
         this.list = list;
+        this.listener = listener;
     }
 
     @NonNull
@@ -94,6 +97,10 @@ public class NotificationAdapter
         }
 
         h.tvTitle.setAlpha(n.isRead() ? 0.7f : 1f);
+        h.btnMarkRead.setVisibility(n.isRead() ? View.GONE : View.VISIBLE);
+        h.btnMarkRead.setOnClickListener(v -> {
+            if (listener != null) listener.onMarkRead(n);
+        });
     }
 
     @Override
@@ -102,7 +109,7 @@ public class NotificationAdapter
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvIcon, tvTitle, tvMessage, tvTime;
+        TextView tvIcon, tvTitle, tvMessage, tvTime, btnMarkRead;
 
         ViewHolder(View v) {
             super(v);
@@ -110,6 +117,7 @@ public class NotificationAdapter
             tvTitle = v.findViewById(R.id.tvTitle);
             tvMessage = v.findViewById(R.id.tvMessage);
             tvTime = v.findViewById(R.id.tvTime);
+            btnMarkRead = v.findViewById(R.id.btnMarkRead);
         }
     }
 }

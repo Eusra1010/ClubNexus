@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
     android:background="@drawable/all_background">
 
@@ -37,15 +38,101 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:drawableEnd="@android:drawable/arrow_down_float"
-                android:padding="10dp"
-                android:layout_marginBottom="12dp"/>
+                android:padding="10dp"/>
 
-            <!-- DIVIDER -->
-            <View
+            <LinearLayout
+                android:id="@+id/searchBox"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#55FFFFFF"
-                android:layout_marginBottom="12dp"/>
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="#000000"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="10dp">
+
+                <TextView
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:text="🔍"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"/>
+
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Search by name or email"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#DDFFFFFF"/>
+            </LinearLayout>
+
+            <!-- COUNTS + FILTERS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tvTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total: 0"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:id="@+id/tvPaid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Paid: 0"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:id="@+id/tvUnpaid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Unpaid: 0"
+                    android:textColor="@android:color/white"/>
+            </LinearLayout>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/filterGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:chipSpacingHorizontal="8dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="All"
+                    android:checkable="true"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPaid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Paid"
+                    android:checkable="true"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipUnpaid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Unpaid"
+                    android:checkable="true"/>
+            </com.google.android.material.chip.ChipGroup>
 
             <!-- REGISTRATION LIST -->
             <androidx.recyclerview.widget.RecyclerView

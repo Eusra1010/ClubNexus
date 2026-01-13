@@ -176,6 +176,83 @@
             android:layout_marginBottom="16dp"/>
 
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Group Registration"
+            android:background="#FFFFFF"
+            android:padding="6dp"
+            android:textColor="#000000" />
+
+        <CheckBox
+            android:id="@+id/cbGroupEvent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This is a group event"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Minimum group members"
+                android:background="#FFFFFF"
+                android:padding="6dp"
+                android:textColor="#000000" />
+
+            <EditText
+                android:id="@+id/etMinGroupMembers"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="e.g., 2"
+                android:background="@null"
+                android:inputType="number"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#F2F2F2"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#000000"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Maximum group members"
+                android:background="#FFFFFF"
+                android:padding="6dp"
+                android:textColor="#000000" />
+
+            <EditText
+                android:id="@+id/etMaxGroupMembers"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="e.g., 5"
+                android:background="@null"
+                android:inputType="number"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#F2F2F2"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#000000"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="12dp"/>
+
+
 
 
         <Button

@@ -26,7 +26,7 @@ public class AdminAnnouncementActivity extends AppCompatActivity {
     Spinner spinnerEvent, spinnerType;
     ImageView btnBack;
 
-    DatabaseReference eventsRef, registrationsRef, notificationsRef;
+    DatabaseReference eventsRef, registrationsRef, notificationsRef, announcementsRef;
 
     List<String> eventNames = new ArrayList<>();
     List<String> eventIds = new ArrayList<>();
@@ -45,6 +45,7 @@ public class AdminAnnouncementActivity extends AppCompatActivity {
         eventsRef = FirebaseDatabase.getInstance().getReference("Events");
         registrationsRef = FirebaseDatabase.getInstance().getReference("EventRegistrations");
         notificationsRef = FirebaseDatabase.getInstance().getReference("Notifications");
+        announcementsRef = FirebaseDatabase.getInstance().getReference("Announcements");
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -109,26 +110,58 @@ public class AdminAnnouncementActivity extends AppCompatActivity {
         String eventId = eventIds.get(pos);
         long time = System.currentTimeMillis();
 
+        // 1) Save the announcement itself (for history/auditing)
+        HashMap<String, Object> announcement = new HashMap<>();
+        announcement.put("title", title);
+        announcement.put("message", message);
+        announcement.put("type", type);
+        announcement.put("eventId", eventId);
+        announcement.put("timestamp", time);
+        announcementsRef.push().setValue(announcement);
+
+        // 2) Deliver notifications to all registered students (individuals + group leaders)
         registrationsRef.child(eventId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        java.util.HashSet<String> recipients = new java.util.HashSet<>();
 
                         for (DataSnapshot ds : snapshot.getChildren()) {
-                            String studentKey = ds.getKey();
+                            String key = ds.getKey();
+                            if (key == null) continue;
 
-                            HashMap<String, Object> notif = new HashMap<>();
-                            notif.put("title", title);
-                            notif.put("message", message);
-                            notif.put("type", type);
-                            notif.put("eventId", eventId);
-                            notif.put("timestamp", time);
-                            notif.put("read", false);
+                            if ("groups".equals(key)) {
+                                for (DataSnapshot g : ds.getChildren()) {
+                                    String leaderRoll = g.child("leaderRoll").getValue(String.class);
+                                    if (leaderRoll != null && !leaderRoll.trim().isEmpty()) {
+                                        recipients.add(leaderRoll.trim());
+                                    }
 
-                            notificationsRef
-                                    .child(studentKey)
-                                    .push()
-                                    .setValue(notif);
+                                    // If group members have roll saved, include them as well
+                                    DataSnapshot members = g.child("members");
+                                    for (DataSnapshot m : members.getChildren()) {
+                                        String memberRoll = m.child("roll").getValue(String.class);
+                                        if (memberRoll != null && !memberRoll.trim().isEmpty()) {
+                                            recipients.add(memberRoll.trim());
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Individual registration: key is the student's roll
+                                recipients.add(key);
+                            }
+                        }
+
+                        HashMap<String, Object> notif = new HashMap<>();
+                        notif.put("title", title);
+                        notif.put("message", message);
+                        notif.put("type", type);
+                        notif.put("eventId", eventId);
+                        notif.put("timestamp", time);
+                        notif.put("read", false);
+
+                        for (String studentKey : recipients) {
+                            notificationsRef.child(studentKey).push().setValue(notif);
                         }
 
                         Toast.makeText(AdminAnnouncementActivity.this,

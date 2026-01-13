@@ -3,6 +3,7 @@ package com.example.eventmanagement;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -19,7 +20,8 @@ import java.util.HashMap;
 
 public class CreateEventActivity extends AppCompatActivity {
 
-    EditText etEventName, etEventDate, etVenue, etClubName, etFees, etDeadline;
+    EditText etEventName, etEventDate, etVenue, etClubName, etFees, etDeadline, etMinGroupMembers, etMaxGroupMembers;
+    CheckBox cbGroupEvent;
     Button btnCreateEvent;
 
     DatabaseReference databaseReference;
@@ -35,6 +37,9 @@ public class CreateEventActivity extends AppCompatActivity {
         etClubName = findViewById(R.id.etClubName);
         etFees = findViewById(R.id.etFees);
         etDeadline = findViewById(R.id.etDeadline);
+        cbGroupEvent = findViewById(R.id.cbGroupEvent);
+        etMinGroupMembers = findViewById(R.id.etMinGroupMembers);
+        etMaxGroupMembers = findViewById(R.id.etMaxGroupMembers);
         btnCreateEvent = findViewById(R.id.btnCreateEvent);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Events");
@@ -44,6 +49,10 @@ public class CreateEventActivity extends AppCompatActivity {
 
         etEventDate.setOnClickListener(v -> showDatePicker(etEventDate));
         etDeadline.setOnClickListener(v -> showDatePicker(etDeadline));
+
+        // Enable/disable group member fields based on checkbox
+        setGroupFieldsEnabled(false);
+        cbGroupEvent.setOnCheckedChangeListener((buttonView, isChecked) -> setGroupFieldsEnabled(isChecked));
 
         btnCreateEvent.setOnClickListener(v -> createEvent());
     }
@@ -73,6 +82,9 @@ public class CreateEventActivity extends AppCompatActivity {
         String clubName = etClubName.getText().toString().trim();
         String fees = etFees.getText().toString().trim();
         String deadline = etDeadline.getText().toString().trim();
+        boolean isGroupEvent = cbGroupEvent.isChecked();
+        String minStr = etMinGroupMembers.getText().toString().trim();
+        String maxStr = etMaxGroupMembers.getText().toString().trim();
 
         if (fees.isEmpty()) fees = "0";
 
@@ -81,7 +93,30 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
-        checkDateAndSave(eventDate, eventName, venue, clubName, fees, deadline);
+        Integer minGroup = null, maxGroup = null;
+        if (isGroupEvent) {
+            if (minStr.isEmpty() || maxStr.isEmpty()) {
+                Toast.makeText(this, "Enter min and max group members", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                minGroup = Integer.parseInt(minStr);
+                maxGroup = Integer.parseInt(maxStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Group member values must be numbers", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (minGroup < 1) {
+                Toast.makeText(this, "Minimum group members must be at least 1", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (maxGroup < minGroup) {
+                Toast.makeText(this, "Maximum group members must be >= minimum", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        checkDateAndSave(eventDate, eventName, venue, clubName, fees, deadline, isGroupEvent, minGroup, maxGroup);
     }
 
     private void checkDateAndSave(String date,
@@ -89,7 +124,10 @@ public class CreateEventActivity extends AppCompatActivity {
                                   String venue,
                                   String clubName,
                                   String fees,
-                                  String deadline) {
+                                  String deadline,
+                                  boolean isGroupEvent,
+                                  Integer minGroup,
+                                  Integer maxGroup) {
 
         databaseReference.orderByChild("eventDate")
                 .equalTo(date)
@@ -98,7 +136,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
                         if (!snapshot.exists()) {
-                            saveEvent(date, eventName, venue, clubName, fees, deadline);
+                            saveEvent(date, eventName, venue, clubName, fees, deadline, isGroupEvent, minGroup, maxGroup);
                         } else {
                             Toast.makeText(
                                     CreateEventActivity.this,
@@ -122,7 +160,10 @@ public class CreateEventActivity extends AppCompatActivity {
                            String venue,
                            String clubName,
                            String fees,
-                           String deadline) {
+                           String deadline,
+                           boolean isGroupEvent,
+                           Integer minGroup,
+                           Integer maxGroup) {
 
         String eventId = databaseReference.push().getKey();
 
@@ -137,6 +178,11 @@ public class CreateEventActivity extends AppCompatActivity {
         eventData.put("registrationCount", 0);
         eventData.put("status", "ACTIVE");
         eventData.put("registrationDeadline", deadline);
+        eventData.put("isGroupEvent", isGroupEvent);
+        if (isGroupEvent) {
+            eventData.put("minGroupMembers", minGroup);
+            eventData.put("maxGroupMembers", maxGroup);
+        }
 
         databaseReference.child(eventId)
                 .setValue(eventData)
@@ -150,5 +196,14 @@ public class CreateEventActivity extends AppCompatActivity {
                                 "Failed to create event",
                                 Toast.LENGTH_SHORT).show()
                 );
+    }
+
+    private void setGroupFieldsEnabled(boolean enabled) {
+        etMinGroupMembers.setEnabled(enabled);
+        etMaxGroupMembers.setEnabled(enabled);
+        if (!enabled) {
+            etMinGroupMembers.setText("");
+            etMaxGroupMembers.setText("");
+        }
     }
 }

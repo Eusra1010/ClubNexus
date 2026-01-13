@@ -51,4 +51,15 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/btnMarkRead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mark read"
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:background="@drawable/bg_edit_event_card"/>
+
 </LinearLayout>

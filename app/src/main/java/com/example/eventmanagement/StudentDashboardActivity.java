@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,12 +28,14 @@ import java.util.ArrayList;
 public class StudentDashboardActivity extends AppCompatActivity {
 
     RecyclerView rvEvents;
-    TextView btnHome, tvViewAll, tvBadgeCount;
+    TextView btnHome, tvViewAll, tvBadgeCount, tvBellText;
+    EditText etSearch;
     ImageView btnNotifications;
     LinearLayout cardMyRegistrations;
 
     DatabaseReference eventRef;
     ArrayList<Event> eventList;
+    ArrayList<Event> allEvents;
     EventAdapter eventAdapter;
 
     String studentKey;
@@ -58,8 +63,10 @@ public class StudentDashboardActivity extends AppCompatActivity {
         btnHome = findViewById(R.id.btnHome);
         btnNotifications = findViewById(R.id.btnNotifications);
         tvViewAll = findViewById(R.id.tvViewAll);
+        etSearch = findViewById(R.id.etSearch);
         cardMyRegistrations = findViewById(R.id.cardMyRegistrations);
         tvBadgeCount = findViewById(R.id.tvBadgeCount);
+        tvBellText = findViewById(R.id.tvBellText);
 
         // EVENTS (HORIZONTAL)
         rvEvents.setLayoutManager(
@@ -67,6 +74,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         );
 
         eventList = new ArrayList<>();
+        allEvents = new ArrayList<>();
         eventAdapter = new EventAdapter(this, eventList, studentKey);
         rvEvents.setAdapter(eventAdapter);
 
@@ -75,6 +83,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         eventRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                allEvents.clear();
                 eventList.clear();
                 int count = 0;
 
@@ -82,6 +91,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
                     if (count == 8) break;
                     Event e = ds.getValue(Event.class);
                     if (e != null) {
+                        allEvents.add(e);
                         eventList.add(e);
                         count++;
                     }
@@ -94,6 +104,14 @@ public class StudentDashboardActivity extends AppCompatActivity {
 
 
         listenForUnreadNotifications();
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterEvents(s == null ? "" : s.toString());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
 
 
         btnHome.setOnClickListener(v -> {
@@ -139,12 +157,31 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         if (count > 0) {
                             tvBadgeCount.setText(String.valueOf(count));
                             tvBadgeCount.setVisibility(View.VISIBLE);
+                            tvBellText.setText("\uD83D\uDD14 " + count);
                         } else {
                             tvBadgeCount.setVisibility(View.GONE);
+                            tvBellText.setText("");
                         }
                     }
 
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
+    }
+
+    private void filterEvents(String query) {
+        String q = query.trim().toLowerCase();
+        eventList.clear();
+        if (q.isEmpty()) {
+            eventList.addAll(allEvents);
+        } else {
+            for (Event e : allEvents) {
+                String name = e.getEventName() == null ? "" : e.getEventName().toLowerCase();
+                String club = e.getClubName() == null ? "" : e.getClubName().toLowerCase();
+                if (name.contains(q) || club.contains(q)) {
+                    eventList.add(e);
+                }
+            }
+        }
+        eventAdapter.notifyDataSetChanged();
     }
 }

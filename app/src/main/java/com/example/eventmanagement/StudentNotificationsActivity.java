@@ -25,8 +25,12 @@ public class StudentNotificationsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private TextView emptyText;
+    private com.google.android.material.chip.ChipGroup filterGroup;
+    private com.google.android.material.chip.Chip chipAll, chipUnread;
+    private TextView btnMarkAllRead;
     private NotificationAdapter adapter;
     private final List<Notification> notifications = new ArrayList<>();
+    private final List<Notification> sourceList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +39,14 @@ public class StudentNotificationsActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.notificationRecyclerView);
         emptyText = findViewById(R.id.emptyText);
+        filterGroup = findViewById(R.id.filterGroup);
+        chipAll = findViewById(R.id.chipAll);
+        chipUnread = findViewById(R.id.chipUnread);
+        btnMarkAllRead = findViewById(R.id.btnMarkAllRead);
         ImageView back = findViewById(R.id.btnBack);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NotificationAdapter(notifications);
+        adapter = new NotificationAdapter(notifications, this::markRead);
         recyclerView.setAdapter(adapter);
 
         back.setOnClickListener(v -> finish());
@@ -55,6 +63,9 @@ public class StudentNotificationsActivity extends AppCompatActivity {
 
         Log.d("NOTIF", "Reading: Notifications/" + studentKey);
         loadNotifications(studentKey);
+
+        filterGroup.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilter());
+        btnMarkAllRead.setOnClickListener(v -> markAllRead(studentKey));
     }
 
     private void loadNotifications(String studentKey) {
@@ -67,27 +78,57 @@ public class StudentNotificationsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                sourceList.clear();
                 notifications.clear();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Notification n = ds.getValue(Notification.class);
                     if (n != null) {
                         n.setNotificationId(ds.getKey());
-                        notifications.add(n);
-
-                        // mark as read
-                        ds.getRef().child("read").setValue(true);
+                        sourceList.add(n);
                     }
                 }
-
-                adapter.notifyDataSetChanged();
-                emptyText.setVisibility(
-                        notifications.isEmpty() ? View.VISIBLE : View.GONE
-                );
+                applyFilter();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    private void applyFilter() {
+        notifications.clear();
+        boolean unreadOnly = filterGroup.getCheckedChipId() == R.id.chipUnread;
+        for (Notification n : sourceList) {
+            if (!unreadOnly || !n.isRead()) {
+                notifications.add(n);
+            }
+        }
+        adapter.notifyDataSetChanged();
+        emptyText.setVisibility(notifications.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void markRead(Notification n) {
+        String studentKey = getIntent().getStringExtra("studentKey");
+        if (studentKey == null || n.getNotificationId() == null) return;
+        FirebaseDatabase.getInstance().getReference("Notifications")
+                .child(studentKey)
+                .child(n.getNotificationId())
+                .child("read")
+                .setValue(true);
+    }
+
+    private void markAllRead(String studentKey) {
+        FirebaseDatabase.getInstance().getReference("Notifications")
+                .child(studentKey)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            ds.getRef().child("read").setValue(true);
+                        }
+                        Toast.makeText(StudentNotificationsActivity.this, "All marked read", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 }

@@ -21,6 +21,56 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
+        <!-- Event name and club at top (auto-filled) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Name"
+            android:background="#FFFFFF"
+            android:padding="6dp"
+            android:textColor="#000000" />
+
+        <EditText
+            android:id="@+id/etEventName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:enabled="false"
+            android:textColor="#FFFFFF"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#000000"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Club"
+            android:background="#FFFFFF"
+            android:padding="6dp"
+            android:textColor="#000000" />
+
+        <EditText
+            android:id="@+id/etClubName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:enabled="false"
+            android:textColor="#FFFFFF"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#000000"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Participant details (leader/individual) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -162,18 +212,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Event Name"
+            android:text="University"
             android:background="#FFFFFF"
             android:padding="6dp"
             android:textColor="#000000" />
 
         <EditText
-            android:id="@+id/etEventName"
+            android:id="@+id/etUniversity"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@null"
             android:enabled="false"
             android:textColor="#FFFFFF"
+            android:textColorHint="#F2F2F2"
             android:paddingTop="10dp"
             android:paddingBottom="10dp" />
 
@@ -183,28 +234,63 @@
             android:background="#000000"
             android:layout_marginBottom="20dp" />
 
+        <!-- Group Registration section (visible for group events) -->
         <TextView
+            android:id="@+id/tvGroupRegistration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Club"
+            android:text="Group Registration"
+            android:textStyle="bold"
             android:background="#FFFFFF"
             android:padding="6dp"
-            android:textColor="#000000" />
+            android:textColor="#000000"
+            android:visibility="gone" />
 
         <EditText
-            android:id="@+id/etClubName"
+            android:id="@+id/etGroupName"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:hint="Group name"
             android:background="@null"
-            android:enabled="false"
             android:textColor="#FFFFFF"
+            android:textColorHint="#F2F2F2"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp" />
+            android:paddingBottom="10dp"
+            android:visibility="gone" />
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#000000"
             android:layout_marginBottom="20dp" />
+
+        <LinearLayout
+            android:id="@+id/groupSizeRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Group members"
+                android:textColor="#FFFFFF"
+                android:layout_gravity="center_vertical"/>
+
+            <Spinner
+                android:id="@+id/spinnerGroupSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:spinnerMode="dropdown"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/membersContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
 
 
 

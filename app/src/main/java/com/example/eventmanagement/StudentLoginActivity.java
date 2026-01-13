@@ -58,9 +58,10 @@ public class StudentLoginActivity extends AppCompatActivity {
                             return;
                         }
 
-                        String dbPassword = snapshot.child("password").getValue(String.class);
+                        String dbPasswordHash = snapshot.child("passwordHash").getValue(String.class);
+                        String inputHash = hashPassword(roll, password);
 
-                        if (password.equals(dbPassword)) {
+                        if (dbPasswordHash != null && dbPasswordHash.equals(inputHash)) {
 
                             Intent intent = new Intent(
                                     StudentLoginActivity.this,
@@ -82,5 +83,17 @@ public class StudentLoginActivity extends AppCompatActivity {
                                 "Database error", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private String hashPassword(String roll, String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest((roll + ":" + password).getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

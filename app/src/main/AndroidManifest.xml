@@ -60,6 +60,7 @@
         <activity android:name=".ViewRegistrationsActivity" />
         <activity android:name=".AdminAnnouncementActivity"/>
         <activity android:name=".StudentNotificationsActivity" />
+        <activity android:name=".MyRegistrationsActivity" />
 
 
 
